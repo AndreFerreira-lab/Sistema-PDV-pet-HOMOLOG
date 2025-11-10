@@ -1,22 +1,27 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - PetShop PDV</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/616/616408.png">
 </head>
-<body>
-  <div class="login-screen">
-    <div class="login-box">
-      <h1>🐾 PetShop PDV</h1>
-      <input type="text" id="usuario" placeholder="Usuário">
-      <input type="password" id="senha" placeholder="Senha">
-      <button onclick="login()">Entrar</button>
-      <p class="login-tip">Usuário: <b>admin</b> | Senha: <b>1234</b></p>
-    </div>
+
+<body id="login-page">
+  <div class="login-container">
+    <h1>🐾 PetShop PDV</h1>
+
+    <input type="text" id="usuario" placeholder="Usuário" autocomplete="off">
+    <input type="password" id="senha" placeholder="Senha">
+
+    <button onclick="login()">Entrar</button>
+
+    <p>Usuário: <b>admin</b> | Senha: <b>1234</b></p>
   </div>
 
   <script src="script.js"></script>
 </body>
 </html>
+
+
