@@ -3,94 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🐾 PetShop PDV</title>
+  <title>Login - PetShop PDV</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- TELA DE LOGIN -->
-  <div id="login-screen" class="screen active">
+  <div class="login-screen">
     <div class="login-box">
       <h1>🐾 PetShop PDV</h1>
-      <input type="text" id="user" placeholder="Usuário">
-      <input type="password" id="pass" placeholder="Senha">
+      <input type="text" id="usuario" placeholder="Usuário">
+      <input type="password" id="senha" placeholder="Senha">
       <button onclick="login()">Entrar</button>
       <p class="login-tip">Usuário: <b>admin</b> | Senha: <b>1234</b></p>
     </div>
-  </div>
-
-  <!-- TELA PRINCIPAL -->
-  <div id="main-screen" class="screen">
-    <aside class="sidebar">
-      <h2>🐾 PetShop</h2>
-      <ul>
-        <li onclick="showSection('clientes')">Clientes</li>
-        <li onclick="showSection('estoque')">Estoque</li>
-        <li onclick="showSection('vendas')">Vendas</li>
-        <li onclick="logout()">Sair</li>
-      </ul>
-    </aside>
-
-    <main class="content">
-      <header>
-        <h1 id="sectionTitle">Clientes</h1>
-      </header>
-
-      <!-- Seção Clientes -->
-      <section id="clientes" class="section active">
-        <div class="form-box">
-          <h3>Cadastrar Cliente</h3>
-          <input type="text" id="nomeCliente" placeholder="Nome do Cliente">
-          <input type="text" id="telefoneCliente" placeholder="Telefone">
-          <button onclick="addCliente()">Adicionar Cliente</button>
-        </div>
-
-        <h3>Lista de Clientes</h3>
-        <table id="tabelaClientes">
-          <thead>
-            <tr><th>Nome</th><th>Telefone</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </section>
-
-      <!-- Seção Estoque -->
-      <section id="estoque" class="section">
-        <div class="form-box">
-          <h3>Cadastrar Produto</h3>
-          <input type="text" id="nomeProduto" placeholder="Produto">
-          <input type="number" id="quantidadeProduto" placeholder="Quantidade">
-          <input type="number" id="precoProduto" placeholder="Preço (R$)">
-          <button onclick="addProduto()">Adicionar Produto</button>
-        </div>
-
-        <h3>Estoque Atual</h3>
-        <table id="tabelaEstoque">
-          <thead>
-            <tr><th>Produto</th><th>Qtd</th><th>Preço</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </section>
-
-      <!-- Seção Vendas -->
-      <section id="vendas" class="section">
-        <div class="form-box">
-          <h3>Registrar Venda</h3>
-          <select id="clienteVenda"></select>
-          <select id="produtoVenda"></select>
-          <input type="number" id="qtdVenda" placeholder="Quantidade">
-          <button onclick="fazerVenda()">Finalizar Venda</button>
-        </div>
-
-        <h3>Histórico de Vendas</h3>
-        <table id="tabelaVendas">
-          <thead>
-            <tr><th>Cliente</th><th>Produto</th><th>Qtd</th><th>Total</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </section>
-    </main>
   </div>
 
   <script src="script.js"></script>
