@@ -1,184 +1,278 @@
-body {
-  background-color: #121212;
-  color: #eee;
-  font-family: "Poppins", sans-serif;
+/* =========================
+   ESTILO GERAL
+========================= */
+* {
   margin: 0;
-  display: flex;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
 }
 
-/* Login */
-.login-screen {
+body {
+  background-color: #121212;
+  color: #fff;
+  min-height: 100vh;
+}
+
+/* =========================
+   MENU LATERAL
+========================= */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 220px;
+  background-color: #1c1c1c;
+  border-right: 2px solid #ffb300;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 30px;
+}
+
+.sidebar h2 {
+  color: #ffb300;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.sidebar a {
+  width: 100%;
+  text-decoration: none;
+  color: #ccc;
+  padding: 12px 20px;
+  display: block;
+  transition: 0.3s;
+  font-weight: 500;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+  background-color: #ffb300;
+  color: #000;
+}
+
+/* =========================
+   CONTEÚDO PRINCIPAL
+========================= */
+.main-content {
+  margin-left: 220px;
+  padding: 40px;
+}
+
+.section-title {
+  font-size: 1.6em;
+  color: #ffb300;
+  margin-bottom: 20px;
+}
+
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.card {
+  background-color: #1e1e1e;
+  border: 1px solid #ffb300;
+  border-radius: 10px;
+  padding: 20px;
+  flex: 1;
+  min-width: 250px;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(255, 179, 0, 0.2);
+}
+
+.card h3 {
+  font-size: 1.2em;
+  margin-bottom: 10px;
+}
+
+.card p {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+/* =========================
+   LOGIN PAGE
+========================= */
+#login-page {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
+  background-color: #121212;
 }
 
-.login-box {
-  background: #1e1e1e;
-  padding: 40px;
+.login-container {
+  background-color: #1e1e1e;
+  border: 2px solid #ffb300;
   border-radius: 12px;
+  box-shadow: 0 0 25px rgba(255, 179, 0, 0.3);
+  padding: 40px;
+  width: 350px;
   text-align: center;
-  box-shadow: 0 0 15px rgba(255, 153, 0, 0.3);
+  animation: fadeIn 0.8s ease;
 }
 
-.login-box input {
-  width: 250px;
-  margin: 10px 0;
+.login-container h1 {
+  color: #ffb300;
+  font-size: 1.8em;
+  margin-bottom: 25px;
+}
+
+.login-container input {
+  width: 100%;
   padding: 10px;
-  border-radius: 8px;
-  border: none;
-}
-
-.login-box button {
-  width: 250px;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  background: #f4b400;
-  color: #121212;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.login-box button:hover {
-  background: #ffd84d;
-}
-
-/* Sidebar */
-.sidebar {
-  background: #1f1f1f;
-  width: 230px;
-  padding: 20px;
-  height: 100vh;
-  position: fixed;
-  top: 0;
-  left: 0;
-}
-
-.sidebar h2 {
-  text-align: center;
-  color: #f4b400;
-  margin-bottom: 30px;
-}
-
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.sidebar li {
-  padding: 12px;
-  background: #2a2a2a;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  text-align: center;
-}
-
-.sidebar li:hover, .sidebar li.active {
-  background: #f4b400;
-  color: #121212;
-}
-
-/* Main content */
-.main {
-  margin-left: 260px;
-  padding: 30px;
-  flex: 1;
-  overflow-y: auto;
-}
-
-header h1 {
-  color: #f4b400;
-}
-
-/* Dashboard Cards */
-.dashboard {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin: 20px 0;
-}
-
-.card {
-  flex: 1;
-  min-width: 200px;
-  background: #1e1e1e;
-  border-radius: 10px;
-  padding: 20px;
-  text-align: center;
-  box-shadow: 0 0 10px rgba(0,0,0,0.4);
-}
-
-.card h3 {
-  color: #f4b400;
-}
-
-.card p {
-  font-size: 28px;
-  margin-top: 10px;
-}
-
-/* Table and Forms */
-input, select, button {
-  margin: 5px;
-  padding: 10px;
+  margin-bottom: 15px;
   border-radius: 6px;
+  border: 1px solid #444;
+  background: #2c2c2c;
+  color: #fff;
+}
+
+.login-container input:focus {
+  border-color: #ffb300;
+  outline: none;
+}
+
+.login-container button {
+  width: 100%;
+  background-color: #ffb300;
   border: none;
-}
-
-button {
-  background: #f4b400;
-  color: #121212;
+  border-radius: 8px;
+  padding: 12px;
   font-weight: bold;
+  color: #000;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-button:hover {
-  background: #ffd84d;
+.login-container button:hover {
+  background-color: #ffc933;
 }
 
+.login-container p {
+  margin-top: 10px;
+  color: #ccc;
+  font-size: 0.9em;
+}
+
+.login-container p b {
+  color: #fff;
+}
+
+/* =========================
+   TABELAS E FORMULÁRIOS
+========================= */
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
-  background: #1e1e1e;
-  border-radius: 10px;
+  margin-top: 20px;
+  background-color: #1c1c1c;
+  border-radius: 8px;
   overflow: hidden;
 }
 
 th, td {
-  padding: 10px;
+  padding: 12px;
   text-align: left;
 }
 
 th {
-  background: #2c2c2c;
-  color: #f4b400;
+  background-color: #ffb300;
+  color: #000;
 }
 
 td {
   border-bottom: 1px solid #333;
 }
 
-/* Responsivo */
+tr:hover {
+  background-color: #292929;
+}
+
+form {
+  background-color: #1e1e1e;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+  box-shadow: 0 0 10px rgba(255, 179, 0, 0.1);
+}
+
+form label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #ffb300;
+}
+
+form input,
+form select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #444;
+  border-radius: 6px;
+  background-color: #2c2c2c;
+  color: #fff;
+}
+
+form input:focus {
+  border-color: #ffb300;
+  outline: none;
+}
+
+button {
+  background-color: #ffb300;
+  color: #000;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background-color: #ffc933;
+}
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
 @media (max-width: 768px) {
-  body {
-    flex-direction: column;
-  }
-
   .sidebar {
-    position: relative;
-    width: 100%;
-    height: auto;
+    width: 180px;
+    padding-top: 20px;
   }
 
-  .main {
-    margin-left: 0;
-    padding: 15px;
+  .main-content {
+    margin-left: 180px;
+    padding: 20px;
   }
 
-  .dashboard {
+  .card-container {
     flex-direction: column;
+  }
+
+  .login-container {
+    width: 90%;
+    padding: 30px 20px;
+  }
+}
+
+/* =========================
+   ANIMAÇÕES
+========================= */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
