@@ -97,3 +97,19 @@ tr:hover td{background:#292929;}
   .login-container{width:90%;padding:28px;}
   .dashboard-subtitle{font-size:1.1rem;max-width:36ch;width:0ch;border-right:2px solid rgba(255,221,102,0.9);}
 }
+/* GRID DO FORMULÁRIO DE CLIENTES */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.form-grid div {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-grid .full {
+  grid-column: 1 / -1;
+}
+
