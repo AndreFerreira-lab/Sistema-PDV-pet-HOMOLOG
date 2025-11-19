@@ -57,26 +57,42 @@ tr:hover td{background:#292929;}
 /* =============== MENSAGEM CINEMATOGRÁFICA =============== */
 .dashboard-subtitle {
   display: inline-block;
-  max-width: 48ch;
-  width: 0ch;
-  margin: 28px auto 0 auto;
-  font-size: 1.6rem;
+  max-width: 68ch;
+  width: auto;
+  margin: 40px auto 0 auto;
+  font-size: 2rem;
   text-align: center;
+
+  /* deslocamento suave para a direita */
+  transform: translateX(40px);
+
   color: #ffdd66;
   font-weight: 800;
   letter-spacing: 1px;
-  padding: 8px 22px;
-  border-radius: 10px;
+  padding: 18px 32px;
+  border-radius: 14px;
   position: relative;
   z-index: 2;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
-  box-shadow: 0 6px 30px rgba(255,179,0,0.06);
-  text-shadow: 0 0 6px rgba(255,204,51,0.8), 0 0 18px rgba(255,153,0,0.6);
-  overflow: hidden;
-  border-right: 3px solid rgba(255,221,102,0.95);
-  
-  /* DESLOCAR PARA A DIREITA */
-  transform: translateX(30px);
+  background: rgba(0, 0, 0, 0.25);
+
+  box-shadow:
+    0 0 22px rgba(255, 179, 0, 0.45),
+    0 0 44px rgba(255, 140, 0, 0.35);
+
+  text-shadow:
+    0 0 12px rgba(255, 204, 51, 1),
+    0 0 28px rgba(255, 153, 0, 0.9);
+
+  border: 2px solid rgba(255, 179, 0, 0.9);
+
+  animation: neonPulse 2.5s infinite ease-in-out;
+}
+
+/* Suave animação de pulsação */
+@keyframes neonPulse {
+  0% { box-shadow: 0 0 14px rgba(255, 180, 0, 0.4); }
+  50% { box-shadow: 0 0 34px rgba(255, 150, 0, 0.8); }
+  100% { box-shadow: 0 0 14px rgba(255, 180, 0, 0.4); }
 }
 
 .dashboard-subtitle.typing{animation:neonPulse 2.2s ease-in-out infinite alternate;}
@@ -116,6 +132,7 @@ tr:hover td{background:#292929;}
 .form-grid .full {
   grid-column: 1 / -1;
 }
+
 
 
 
