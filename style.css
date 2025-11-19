@@ -55,26 +55,30 @@ tr:hover td{background:#292929;}
 .btn-delete{background:#ef4444;color:#fff;}
 
 /* =============== MENSAGEM CINEMATOGRÁFICA =============== */
-.dashboard-subtitle{
-  display:inline-block;
-  max-width:48ch;
-  width:0ch;
-  margin:28px auto 0 auto;
-  font-size:1.6rem;
-  text-align:center;
-  color:#ffdd66;
-  font-weight:800;
-  letter-spacing:1px;
-  padding:8px 22px;
-  border-radius:10px;
-  position:relative;
-  z-index:2;
-  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
-  box-shadow:0 6px 30px rgba(255,179,0,0.06);
-  text-shadow:0 0 6px rgba(255,204,51,0.8),0 0 18px rgba(255,153,0,0.6);
-  overflow:hidden;
-  border-right:3px solid rgba(255,221,102,0.95);
+.dashboard-subtitle {
+  display: inline-block;
+  max-width: 48ch;
+  width: 0ch;
+  margin: 28px auto 0 auto;
+  font-size: 1.6rem;
+  text-align: center;
+  color: #ffdd66;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 8px 22px;
+  border-radius: 10px;
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+  box-shadow: 0 6px 30px rgba(255,179,0,0.06);
+  text-shadow: 0 0 6px rgba(255,204,51,0.8), 0 0 18px rgba(255,153,0,0.6);
+  overflow: hidden;
+  border-right: 3px solid rgba(255,221,102,0.95);
+  
+  /* DESLOCAR PARA A DIREITA */
+  transform: translateX(20px);
 }
+
 .dashboard-subtitle.typing{animation:neonPulse 2.2s ease-in-out infinite alternate;}
 @keyframes neonPulse{
   from{text-shadow:0 0 8px rgba(255,204,51,0.9),0 0 20px rgba(255,153,0,0.6);transform:translateY(0);}
@@ -112,4 +116,5 @@ tr:hover td{background:#292929;}
 .form-grid .full {
   grid-column: 1 / -1;
 }
+
 
