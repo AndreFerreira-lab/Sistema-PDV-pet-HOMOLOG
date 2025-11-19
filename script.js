@@ -1,245 +1,178 @@
-// ======================================================
-// =============== VARIÁVEIS PRINCIPAIS =================
-// ======================================================
+/* ====== SPLASH ====== */
+window.onload = () => {
+  setTimeout(() => {
+    document.getElementById("splash").classList.add("hidden");
+    document.getElementById("login-page").classList.remove("hidden");
+  }, 1800);
+};
+
+/* ====== LOGIN ====== */
+function login() {
+  const u = usuario.value.trim();
+  const s = senha.value.trim();
+
+  if (u === "admin" && s === "1234") {
+    localStorage.setItem("logado", "true");
+    login-page.classList.add("hidden");
+    app.classList.remove("hidden");
+    carregar();
+  } else {
+    alert("Usuário e senha inválidos!");
+  }
+}
+
+function logout() {
+  localStorage.removeItem("logado");
+  location.reload();
+}
+
+/* ====== NAVEGAÇÃO ====== */
+function mostrarPagina(id) {
+  document.querySelectorAll("section").forEach(sec => sec.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+
+  document.querySelectorAll(".sidebar a").forEach(a => a.classList.remove("active"));
+  document.getElementById("link" + id.charAt(0).toUpperCase() + id.slice(1)).classList.add("active");
+}
+
+/* ====== DADOS ====== */
 let clientes = JSON.parse(localStorage.getItem("clientes")) || [];
 let estoque = JSON.parse(localStorage.getItem("estoque")) || [];
 let vendas = JSON.parse(localStorage.getItem("vendas")) || [];
 
-// ======================================================
-// ======================= LOGIN =========================
-// ======================================================
-function login() {
-    const user = document.getElementById("usuario").value.trim();
-    const pass = document.getElementById("senha").value.trim();
-
-    if (user === "admin" && pass === "1234") {
-        localStorage.setItem("logado", "true");
-        document.getElementById("login-page").classList.add("hidden");
-        document.getElementById("app").classList.remove("hidden");
-        carregarDados();
-    } else {
-        alert("Usuário ou senha incorretos!");
-    }
-}
-
-function logout() {
-    localStorage.removeItem("logado");
-    location.reload();
-}
-
-// ======================================================
-// ===================== NAVEGAÇÃO =======================
-// ======================================================
-function mostrarPagina(id) {
-    document.querySelectorAll("main section").forEach(s => s.classList.add("hidden"));
-    document.getElementById(id).classList.remove("hidden");
-
-    document.querySelectorAll(".sidebar a").forEach(a => a.classList.remove("active"));
-    const link = document.getElementById("link" + id.charAt(0).toUpperCase() + id.slice(1));
-    if (link) link.classList.add("active");
-
-    atualizarDashboard();
-}
-
-// ======================================================
-// ===================== CLIENTES ========================
-// ======================================================
+/* ====== CLIENTES ====== */
 function addCliente() {
+  const c = {
+    id: Date.now(),
+    nome: nomeCliente.value,
+    tel: telefoneCliente.value,
+    bairro: bairroCliente.value
+  };
 
-    const cliente = {
-        id: Date.now(),
-        nome: document.getElementById("nomeCliente").value.trim(),
-        tel: document.getElementById("telefoneCliente").value.trim(),
-        endereco: document.getElementById("enderecoCliente").value.trim(),
-        numero: document.getElementById("numeroCliente").value.trim(),
-        bairro: document.getElementById("bairroCliente").value.trim(),
-        cidade: document.getElementById("cidadeCliente").value.trim(),
-        cep: document.getElementById("cepCliente").value.trim(),
-        referencia: document.getElementById("referenciaCliente").value.trim(),
-        tipo: document.getElementById("tipoCliente").value,
-        pagamento: document.getElementById("pagamentoPreferido").value,
-        obs: document.getElementById("obsCliente").value.trim()
-    };
+  clientes.push(c);
+  localStorage.setItem("clientes", JSON.stringify(clientes));
 
-    if (!cliente.nome) return alert("O nome do cliente é obrigatório!");
-
-    clientes.push(cliente);
-    localStorage.setItem("clientes", JSON.stringify(clientes));
-
-    limparCamposCliente();
-    atualizarClientes();
-    atualizarSelects();
-    atualizarDashboard();
-}
-
-function limparCamposCliente() {
-    const campos = [
-        "nomeCliente", "telefoneCliente", "enderecoCliente", "numeroCliente",
-        "bairroCliente", "cidadeCliente", "cepCliente", "referenciaCliente",
-        "obsCliente"
-    ];
-    campos.forEach(id => document.getElementById(id).value = "");
+  atualizarClientes();
+  atualizarSelects();
+  atualizarDashboard();
 }
 
 function atualizarClientes() {
-    const tb = document.getElementById("tabelaClientes");
-    tb.innerHTML = clientes.map(c => `
-      <tr>
-        <td>${c.nome}</td>
-        <td>${c.tel}</td>
-        <td>${c.bairro}</td>
-        <td>${c.cidade}</td>
-        <td>
-            <button class="btn-sm btn-delete" onclick="delCliente(${c.id})">🗑</button>
-        </td>
-      </tr>
-    `).join("");
+  tabelaClientes.innerHTML = clientes.map(c => `
+    <tr>
+      <td>${c.nome}</td>
+      <td>${c.tel}</td>
+      <td>${c.bairro}</td>
+      <td><button class="btn-delete" onclick="delCliente(${c.id})">🗑</button></td>
+    </tr>
+  `).join("");
 }
 
 function delCliente(id) {
-    clientes = clientes.filter(c => c.id !== id);
-    localStorage.setItem("clientes", JSON.stringify(clientes));
-    atualizarClientes();
-    atualizarSelects();
-    atualizarDashboard();
+  clientes = clientes.filter(c => c.id !== id);
+  localStorage.setItem("clientes", JSON.stringify(clientes));
+  atualizarClientes();
+  atualizarDashboard();
 }
 
-// ======================================================
-// ======================== ESTOQUE ======================
-// ======================================================
+/* ====== ESTOQUE ====== */
 function addProduto() {
-    const nome = document.getElementById("nomeProduto").value.trim();
-    const qtd = parseInt(document.getElementById("quantidadeProduto").value) || 0;
-    const preco = parseFloat(document.getElementById("precoProduto").value) || 0;
+  estoque.push({
+    id: Date.now(),
+    nome: nomeProduto.value,
+    qtd: Number(quantidadeProduto.value),
+    preco: Number(precoProduto.value)
+  });
 
-    if (!nome) return alert("Informe o nome do produto!");
-
-    estoque.push({ id: Date.now(), nome, qtd, preco });
-
-    localStorage.setItem("estoque", JSON.stringify(estoque));
-
-    document.getElementById("nomeProduto").value = "";
-    document.getElementById("quantidadeProduto").value = "";
-    document.getElementById("precoProduto").value = "";
-
-    atualizarEstoque();
-    atualizarSelects();
-    atualizarDashboard();
+  localStorage.setItem("estoque", JSON.stringify(estoque));
+  atualizarEstoque();
+  atualizarSelects();
+  atualizarDashboard();
 }
 
 function atualizarEstoque() {
-    const tb = document.getElementById("tabelaEstoque");
-
-    tb.innerHTML = estoque
-        .map(p => `
-        <tr>
-            <td>${p.nome}</td>
-            <td>${p.qtd}</td>
-            <td>R$ ${p.preco.toFixed(2)}</td>
-            <td><button class="btn-sm btn-delete" onclick="delProduto(${p.id})">🗑</button></td>
-        </tr>
-    `).join("");
+  tabelaEstoque.innerHTML = estoque.map(p => `
+    <tr>
+      <td>${p.nome}</td>
+      <td>${p.qtd}</td>
+      <td>R$ ${p.preco.toFixed(2)}</td>
+      <td><button class="btn-delete" onclick="delProduto(${p.id})">🗑</button></td>
+    </tr>
+  `).join("");
 }
 
 function delProduto(id) {
-    estoque = estoque.filter(p => p.id !== id);
-    localStorage.setItem("estoque", JSON.stringify(estoque));
-    atualizarEstoque();
-    atualizarSelects();
-    atualizarDashboard();
+  estoque = estoque.filter(p => p.id !== id);
+  localStorage.setItem("estoque", JSON.stringify(estoque));
+  atualizarEstoque();
+  atualizarDashboard();
 }
 
-// ======================================================
-// ======================== VENDAS =======================
-// ======================================================
+/* ====== VENDAS ====== */
 function fazerVenda() {
-    const cliente = document.getElementById("clienteVenda").value;
-    const produtoNome = document.getElementById("produtoVenda").value;
-    const qtd = parseInt(document.getElementById("qtdVenda").value);
+  const cliente = clienteVenda.value;
+  const produto = produtoVenda.value;
+  const qtd = Number(qtdVenda.value);
 
-    if (!cliente || !produtoNome || qtd <= 0)
-        return alert("Preencha todos os campos corretamente!");
+  const prod = estoque.find(p => p.nome === produto);
+  if (!prod) return alert("Produto inválido");
+  if (prod.qtd < qtd) return alert("Estoque insuficiente!");
 
-    const produto = estoque.find(p => p.nome === produtoNome);
+  prod.qtd -= qtd;
 
-    if (!produto || produto.qtd < qtd)
-        return alert("Estoque insuficiente!");
+  vendas.push({
+    id: Date.now(),
+    cliente,
+    produto,
+    qtd,
+    total: qtd * prod.preco
+  });
 
-    produto.qtd -= qtd;
+  localStorage.setItem("vendas", JSON.stringify(vendas));
+  localStorage.setItem("estoque", JSON.stringify(estoque));
 
-    const total = (produto.preco * qtd);
-
-    vendas.push({
-        id: Date.now(),
-        cliente,
-        produto: produtoNome,
-        qtd,
-        total
-    });
-
-    localStorage.setItem("vendas", JSON.stringify(vendas));
-    localStorage.setItem("estoque", JSON.stringify(estoque));
-
-    atualizarEstoque();
-    atualizarVendas();
-    atualizarDashboard();
-
-    alert(`Venda registrada com sucesso!\nTotal: R$ ${total.toFixed(2)}`);
+  atualizarVendas();
+  atualizarEstoque();
+  atualizarDashboard();
 }
 
 function atualizarVendas() {
-    const tb = document.getElementById("tabelaVendas");
-
-    tb.innerHTML = vendas
-        .map(v => `
-        <tr>
-            <td>${v.cliente}</td>
-            <td>${v.produto}</td>
-            <td>${v.qtd}</td>
-            <td>R$ ${v.total.toFixed(2)}</td>
-        </tr>
-    `).join("");
+  tabelaVendas.innerHTML = vendas.map(v => `
+    <tr>
+      <td>${v.cliente}</td>
+      <td>${v.produto}</td>
+      <td>${v.qtd}</td>
+      <td>R$ ${v.total.toFixed(2)}</td>
+    </tr>
+  `).join("");
 }
 
-// ======================================================
-// ======================= DASHBOARD =====================
-// ======================================================
+/* ====== DASHBOARD ====== */
 function atualizarDashboard() {
-    document.getElementById("totalClientes").textContent = clientes.length;
-    document.getElementById("totalProdutos").textContent =
-        estoque.reduce((acum, p) => acum + p.qtd, 0);
-    document.getElementById("totalVendas").textContent = vendas.length;
+  totalClientes.textContent = clientes.length;
+  totalProdutos.textContent = estoque.reduce((t, p) => t + p.qtd, 0);
+  totalVendas.textContent = vendas.length;
 }
 
+/* ====== SELECTS ====== */
 function atualizarSelects() {
-    const selectClientes = document.getElementById("clienteVenda");
-    const selectProdutos = document.getElementById("produtoVenda");
-
-    selectClientes.innerHTML =
-        "<option value=''>-- selecione --</option>" +
-        clientes.map(c => `<option>${c.nome}</option>`).join("");
-
-    selectProdutos.innerHTML =
-        "<option value=''>-- selecione --</option>" +
-        estoque.map(p => `<option>${p.nome}</option>`).join("");
+  clienteVenda.innerHTML = clientes.map(c => `<option>${c.nome}</option>`).join("");
+  produtoVenda.innerHTML = estoque.map(p => `<option>${p.nome}</option>`).join("");
 }
 
-// ======================================================
-// ===================== INICIALIZAÇÃO ===================
-// ======================================================
-function carregarDados() {
-    atualizarClientes();
-    atualizarEstoque();
-    atualizarVendas();
-    atualizarSelects();
-    atualizarDashboard();
+/* ====== CARREGAR ====== */
+function carregar() {
+  atualizarClientes();
+  atualizarEstoque();
+  atualizarVendas();
+  atualizarSelects();
+  atualizarDashboard();
 }
 
-// AUTO LOGIN
-window.addEventListener("load", () => {
-    if (localStorage.getItem("logado") === "true") {
-        document.getElementById("login-page").classList.add("hidden");
-        document.getElementById("app").classList.remove("hidden");
-        carregarDados();
-    }
-});
+/* ===== AUTO LOGIN ===== */
+if (localStorage.getItem("logado") === "true") {
+  splash.classList.add("hidden");
+  login-page.classList.add("hidden");
+  app.classList.remove("hidden");
+  carregar();
+}
