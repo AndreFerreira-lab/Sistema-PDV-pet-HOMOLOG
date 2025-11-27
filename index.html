@@ -1,217 +1,335 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Pizzaria Dona Jô - PDV</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pizzaria Dona Jô - PDV 2.0</title>
 
-  <!-- FontAwesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
 
-  <!-- SPLASH -->
-  <div id="splash">
-    <div class="splash-content">
-      <h1 class="splash-title">🍕 Pizzaria Dona Jô</h1>
-      <p class="splash-sub">Carregando o sistema...</p>
-      <div class="loader"></div>
+<body class="bg-neutral-900 text-gray-100 font-sans antialiased overflow-hidden h-screen">
+
+  <section id="login-page" class="absolute inset-0 z-50 flex items-center justify-center bg-neutral-900">
+    <div class="bg-neutral-800 p-8 rounded-xl border border-amber-500/30 shadow-2xl w-full max-w-md text-center">
+      <h1 class="text-4xl font-bold text-amber-500 neon-text mb-2">🍕 Dona Jô</h1>
+      <p class="text-gray-400 mb-6">Sistema de Gestão & PDV</p>
+
+      <div class="space-y-4 text-left">
+        <div>
+          <label class="text-sm text-gray-400">Usuário</label>
+          <input type="text" id="usuario" class="input-field" placeholder="admin">
+        </div>
+        <div>
+          <label class="text-sm text-gray-400">Senha</label>
+          <input type="password" id="senha" class="input-field" placeholder="1234">
+        </div>
+        <button onclick="login()" class="btn-primary w-full mt-4 justify-center">ENTRAR</button>
+      </div>
+      <p class="mt-4 text-xs text-gray-600">Admin: admin / Senha: 1234</p>
     </div>
-  </div>
+  </section>
 
-  <!-- LOGIN -->
-  <div id="login-page" class="hidden">
-    <div class="login-container fade-in" role="dialog" aria-labelledby="login-title">
-      <h1 id="login-title">🍕 Dona Jô Delivery</h1>
-      <input id="usuario" type="text" placeholder="Usuário" autocomplete="username" />
-      <input id="senha" type="password" placeholder="Senha" autocomplete="current-password" />
-      <button id="btnLogin" type="button">Entrar</button>
-      <p class="login-tip">Usuário: <b>admin</b> | Senha: <b>1234</b></p>
-    </div>
-  </div>
+  <div id="app" class="hidden flex h-full">
 
-  <!-- APLICAÇÃO -->
-  <div id="app" class="hidden" aria-hidden="true">
-
-    <!-- SIDEBAR -->
-    <aside class="sidebar" role="navigation" aria-label="Menu principal">
-      <h2>🍕 Pizzaria Dona Jô</h2>
-      <a id="linkDashboard" onclick="mostrarPagina('dashboard')" class="active"><i class="fa fa-home"></i> Início</a>
-      <a id="linkClientes" onclick="mostrarPagina('clientes')"><i class="fa fa-users"></i> Clientes</a>
-      <a id="linkEstoque" onclick="mostrarPagina('estoque')"><i class="fa fa-box"></i> Estoque</a>
-      <a id="linkVendas" onclick="mostrarPagina('vendas')"><i class="fa fa-money-bill"></i> Vendas</a>
-      <a onclick="logout()"><i class="fa fa-right-from-bracket"></i> Sair</a>
+    <aside class="w-64 bg-neutral-800 border-r border-amber-500/30 flex-shrink-0 flex flex-col hidden md:flex">
+      <div class="p-6 text-center border-b border-gray-700">
+        <h2 class="text-2xl font-bold text-amber-500 neon-text">🍕 Dona Jô</h2>
+      </div>
+      <nav class="flex-grow p-4 space-y-2">
+        <button onclick="mostrarPagina('dashboard')" id="btn-dashboard" class="nav-btn active"><i
+            class="fa fa-home w-6"></i> Início</button>
+        <button onclick="mostrarPagina('clientes')" id="btn-clientes" class="nav-btn"><i class="fa fa-users w-6"></i>
+          Clientes</button>
+        <button onclick="mostrarPagina('estoque')" id="btn-estoque" class="nav-btn"><i class="fa fa-box w-6"></i>
+          Estoque</button>
+        <button onclick="mostrarPagina('vendas')" id="btn-vendas" class="nav-btn"><i
+            class="fa fa-shopping-cart w-6"></i> Vendas (PDV)</button>
+      </nav>
+      <div class="p-4 border-t border-gray-700">
+        <button onclick="logout()"
+          class="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"><i
+            class="fa fa-sign-out-alt"></i> Sair</button>
+      </div>
     </aside>
 
-    <!-- MAIN -->
-    <main class="main-content">
+    <main class="flex-grow flex flex-col h-full overflow-hidden relative bg-neutral-900">
 
-      <!-- DASHBOARD -->
-      <section id="dashboard">
-        <h1 class="section-title">🍕 Dashboard – Pizzaria Dona Jô</h1>
-
-        <div class="card-container">
-          <div class="card">
-            <h3>👥 Clientes</h3>
-            <p id="totalClientes">0</p>
-          </div>
-
-          <div class="card">
-            <h3>📦 Produtos</h3>
-            <p id="totalProdutos">0</p>
-          </div>
-
-          <div class="card">
-            <h3>💰 Vendas</h3>
-            <p id="totalVendas">0</p>
-          </div>
+      <div
+        class="md:hidden bg-neutral-800 border-b border-amber-500/30 p-4 flex justify-between items-center z-10 shadow-md flex-shrink-0">
+        <span class="font-bold text-amber-500 text-xl">🍕 Dona Jô</span>
+        <div class="flex gap-4 text-gray-300">
+          <button onclick="mostrarPagina('dashboard')"><i class="fa fa-home text-xl"></i></button>
+          <button onclick="mostrarPagina('vendas')"><i class="fa fa-shopping-cart text-xl"></i></button>
+          <button onclick="logout()" class="text-red-400"><i class="fa fa-sign-out-alt text-xl"></i></button>
         </div>
+      </div>
 
-        <p class="dashboard-subtitle">Seja bem-vindo ao nosso sistema! 🍕🔥</p>
-      </section>
+      <div class="flex-grow overflow-auto p-4 md:p-8 space-y-6">
 
-      <!-- CLIENTES -->
-      <section id="clientes" class="hidden">
-  <h1 class="section-title">Clientes</h1>
+        <section id="dashboard" class="page-section fade-in">
+          <h1 class="text-3xl font-bold text-amber-500 neon-text mb-6 flex items-center gap-3">
+            <i class="fa fa-chart-line animate-pulse"></i> Dashboard
+          </h1>
 
-  <form onsubmit="event.preventDefault(); addCliente();" class="form-grid">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="card-stat">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="text-amber-500 font-semibold">Clientes</h3>
+                <i class="fa fa-users text-amber-500 text-xl"></i>
+              </div>
+              <p id="totalClientes" class="text-4xl font-bold text-white">0</p>
+            </div>
+            <div class="card-stat">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="text-amber-500 font-semibold">Itens Estoque</h3>
+                <i class="fa fa-boxes text-amber-500 text-xl"></i>
+              </div>
+              <p id="totalProdutos" class="text-4xl font-bold text-white">0</p>
+            </div>
+            <div class="card-stat">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="text-amber-500 font-semibold">Vendas Totais</h3>
+                <i class="fa fa-money-bill-wave text-amber-500 text-xl"></i>
+              </div>
+              <p id="totalVendasDisplay" class="text-4xl font-bold text-white">0</p>
+            </div>
+          </div>
 
-    <div>
-      <label>Nome</label>
-      <input id="nomeCliente" type="text" required>
-    </div>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div class="bg-neutral-800 border border-amber-500/20 p-6 rounded-xl shadow-lg h-80 lg:col-span-2">
+              <h3 class="text-xl font-bold text-white mb-4 border-l-4 border-amber-500 pl-3">Fluxo de Vendas
+                (Últimas 10)</h3>
+              <div class="relative h-60 w-full">
+                <canvas id="salesChart"></canvas>
+              </div>
+            </div>
 
-    <div>
-      <label>Telefone</label>
-      <input id="telefoneCliente" type="text" placeholder="(11) 99999-9999">
-    </div>
+            <div
+              class="bg-neutral-800 border border-red-500/20 p-6 rounded-xl shadow-lg h-80 flex flex-col justify-between">
+              <h3 class="text-xl font-bold text-red-500 mb-4 border-l-4 border-red-500 pl-3">🛠️ Utilidades</h3>
+              <p class="text-gray-400 mb-4 text-sm">Use o botão abaixo com cautela. Ele apaga todos os dados de
+                Clientes, Estoque e Vendas armazenados no seu navegador.</p>
+              <button onclick="clearAllRecords()"
+                class="bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg w-full transition-colors flex items-center justify-center gap-2">
+                <i class="fa fa-eraser"></i> ZERAR TODOS OS REGISTROS
+              </button>
+            </div>
+          </div>
+        </section>
 
-    <div>
-      <label>Endereço</label>
-      <input id="enderecoCliente" type="text">
-    </div>
+        <section id="clientes" class="page-section hidden fade-in">
+          <h1 class="text-3xl font-bold text-amber-500 neon-text mb-6 flex items-center gap-3">
+            <i class="fa fa-users"></i> Clientes
+          </h1>
 
-    <div>
-      <label>Número</label>
-      <input id="numeroCliente" type="text">
-    </div>
+          <div class="max-w-4xl mx-auto mb-10">
+            <form onsubmit="event.preventDefault(); addCliente();"
+              class="bg-neutral-800 p-8 rounded-xl border border-amber-500/20 shadow-2xl space-y-4">
+              <h2 class="text-2xl font-bold text-amber-500 mb-4 border-b border-gray-700 pb-2 flex items-center gap-2">
+                <i class="fa fa-user-plus"></i> Novo Cadastro
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-amber-500 text-sm font-bold mb-1">Nome *</label>
+                  <input id="nomeCliente" type="text" class="input-field" required>
+                </div>
+                <div>
+                  <label class="block text-amber-500 text-sm font-bold mb-1">Telefone</label>
+                  <input id="telCliente" type="text" class="input-field">
+                </div>
 
-    <div>
-      <label>Bairro</label>
-      <input id="bairroCliente" type="text">
-    </div>
+                <div class="md:col-span-2">
+                  <label class="block text-amber-500 text-sm font-bold mb-1">Endereço
+                    (Rua/Av/Bairro)</label>
+                  <input id="enderecoCliente" type="text" class="input-field">
+                </div>
+                <div class="grid grid-cols-2 gap-4 md:col-span-2">
+                  <div>
+                    <label class="block text-amber-500 text-sm font-bold mb-1">Número</label>
+                    <input id="numeroCliente" type="text" class="input-field">
+                  </div>
+                  <div>
+                    <label class="block text-amber-500 text-sm font-bold mb-1">CEP</label>
+                    <input id="cepCliente" type="text" class="input-field" placeholder="Ex: 00000-000">
+                  </div>
+                </div>
 
-    <div>
-      <label>Cidade</label>
-      <input id="cidadeCliente" type="text">
-    </div>
+                <div class="md:col-span-2">
+                  <label class="block text-amber-500 text-sm font-bold mb-1">Pagamento Preferido</label>
+                  <select id="pagamentoPreferidoCliente" class="input-field">
+                    <option value="">-- Selecione --</option>
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Cartao">Cartão de Crédito/Débito</option>
+                    <option value="PIX">PIX</option>
+                    <option value="Outro">Outro</option>
+                  </select>
+                </div>
+              </div>
 
-    <div>
-      <label>CEP</label>
-      <input id="cepCliente" type="text" placeholder="00000-000">
-    </div>
+              <button type="submit" class="btn-primary w-full mt-6"><i class="fa fa-save"></i> Salvar
+                Cliente</button>
+            </form>
+          </div>
 
-    <div>
-      <label>Ponto de Referência</label>
-      <input id="referenciaCliente" type="text">
-    </div>
-
-    <div>
-      <label>Tipo de Cliente</label>
-      <select id="tipoCliente">
-        <option value="Residencial">Residencial</option>
-        <option value="Comercial">Comercial</option>
-      </select>
-    </div>
-
-    <div>
-      <label>Pagamento Preferido</label>
-      <select id="pagamentoPreferido">
-        <option>Dinheiro</option>
-        <option>Pix</option>
-        <option>Cartão Débito</option>
-        <option>Cartão Crédito</option>
-      </select>
-    </div>
-
-    <div class="full">
-      <label>Observações</label>
-      <input id="obsCliente" type="text">
-    </div>
-
-    <button class="full" type="submit">Salvar</button>
-  </form>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Nome</th>
-        <th>Telefone</th>
-        <th>Bairro</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody id="tabelaClientes"></tbody>
-  </table>
-</section>
+          <div id="clientes-consulta"
+            class="bg-neutral-800 rounded-xl border border-amber-500/20 overflow-hidden shadow-lg">
+            <div class="p-4 bg-neutral-900/50 border-b border-gray-700">
+              <h2 class="text-xl font-bold">Base de Clientes Cadastrados</h2>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead class="bg-amber-500 text-black whitespace-nowrap">
+                  <tr>
+                    <th class="p-3">Nome</th>
+                    <th class="p-3">Telefone</th>
+                    <th class="p-3">Endereço</th>
+                    <th class="p-3">CEP</th>
+                    <th class="p-3">Pag. Pref.</th>
+                    <th class="p-3 text-right">Ação</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaClientes"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
 
 
-      <!-- ESTOQUE -->
-      <section id="estoque" class="hidden">
-        <h1 class="section-title">Estoque</h1>
+        <section id="estoque" class="page-section hidden fade-in">
+          <h1 class="text-3xl font-bold text-amber-500 neon-text mb-6 flex items-center gap-3">
+            <i class="fa fa-boxes"></i> Estoque
+          </h1>
 
-        <form id="formEstoque" onsubmit="event.preventDefault(); addProduto();">
-          <label>Produto</label>
-          <input id="nomeProduto" type="text" required />
+          <div class="max-w-lg mx-auto mb-10">
+            <form onsubmit="event.preventDefault(); addProduto();"
+              class="bg-neutral-800 p-8 rounded-xl border border-amber-500/20 shadow-2xl space-y-4">
+              <h2 class="text-2xl font-bold text-amber-500 mb-4 border-b border-gray-700 pb-2 flex items-center gap-2">
+                <i class="fa fa-plus-circle"></i> Cadastro de Produto
+              </h2>
+              <div>
+                <label class="block text-amber-500 text-sm font-bold mb-1">Nome do Produto</label>
+                <input id="nomeProduto" type="text" class="input-field" placeholder="Ex: Pizza Calabresa" required>
+              </div>
+              <div>
+                <label class="block text-amber-500 text-sm font-bold mb-1">Quantidade</label>
+                <input id="qtdProduto" type="number" class="input-field" placeholder="0">
+              </div>
+              <div>
+                <label class="block text-amber-500 text-sm font-bold mb-1">Preço (R$)</label>
+                <input id="precoProduto" type="number" step="0.01" class="input-field" placeholder="0.00">
+              </div>
+              <button type="submit" class="btn-primary w-full mt-4"><i class="fa fa-plus"></i> Adicionar
+                ao Estoque</button>
+            </form>
+          </div>
 
-          <label>Quantidade</label>
-          <input id="quantidadeProduto" type="number" min="0" value="0" />
+          <div id="estoque-consulta"
+            class="bg-neutral-800 rounded-xl border border-amber-500/20 overflow-hidden shadow-lg">
+            <div class="p-4 bg-neutral-900/50 border-b border-gray-700">
+              <h2 class="text-xl font-bold">Itens Cadastrados</h2>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead class="bg-amber-500 text-black">
+                  <tr>
+                    <th class="p-3">Produto</th>
+                    <th class="p-3 text-center">Qtd</th>
+                    <th class="p-3 text-right">Preço</th>
+                    <th class="p-3 text-right">Ação</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaEstoque"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
 
-          <label>Preço</label>
-          <input id="precoProduto" type="number" step="0.01" min="0" value="0.00" />
 
-          <button type="submit">Salvar</button>
-        </form>
+        <section id="vendas" class="page-section hidden fade-in h-full flex flex-col">
+          <h1 class="text-3xl font-bold text-amber-500 neon-text mb-6 flex items-center gap-2"><i
+              class="fa fa-shopping-cart"></i> PDV & Histórico
+          </h1>
 
-        <table>
-          <thead>
-            <tr><th>Produto</th><th>Qtd</th><th>Preço</th><th></th></tr>
-          </thead>
-          <tbody id="tabelaEstoque"></tbody>
-        </table>
-      </section>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-shrink-0 mb-10 max-w-4xl mx-auto w-full">
+            <div class="flex flex-col gap-6">
+              <div class="bg-neutral-800 p-6 rounded-xl border border-amber-500/20 shadow-lg">
+                <h3 class="text-xl font-bold text-amber-500 mb-4 border-b border-gray-700 pb-2 flex items-center gap-2">
+                  <i class="fa fa-cash-register"></i> Novo Pedido (PDV)</h3>
+                <div class="space-y-4">
+                  <div>
+                    <label class="text-amber-500 font-bold text-sm">1. Cliente</label>
+                    <select id="selCliente" class="input-field"></select>
+                  </div>
+                  <div>
+                    <label class="text-amber-500 font-bold text-sm">2. Adicionar Produto</label>
+                    <div class="flex gap-2">
+                      <select id="selProduto" class="input-field"></select>
+                      <button onclick="adicionarAoCarrinho()"
+                        class="bg-amber-500 hover:bg-amber-400 text-black font-bold px-4 rounded transition-colors"><i
+                          class="fa fa-plus"></i></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-      <!-- VENDAS -->
-      <section id="vendas" class="hidden">
-        <h1 class="section-title">Vendas</h1>
+              <div class="bg-neutral-800 p-6 rounded-xl border border-amber-500/20 shadow-lg flex-grow flex flex-col">
+                <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
+                  <h2 class="text-xl font-bold text-white">🛒 Carrinho</h2>
+                  <span class="text-amber-500 font-bold text-xl" id="totalCarrinhoDisplay">R$
+                    0.00</span>
+                </div>
 
-        <form id="formVendas" onsubmit="event.preventDefault(); fazerVenda();">
-          <label>Cliente</label>
-          <select id="clienteVenda"></select>
+                <div id="listaCarrinho" class="flex-grow overflow-y-auto space-y-2 pr-2 mb-4 h-64">
+                  <div class="text-center text-gray-500 py-8 italic border-2 border-dashed border-gray-700 rounded">
+                    Carrinho vazio</div>
+                </div>
 
-          <label>Produto</label>
-          <select id="produtoVenda"></select>
+                <button onclick="finalizarVenda()" id="btnFinalizar"
+                  class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-lg shadow-[0_0_15px_rgba(34,197,94,0.4)] transition-all opacity-50 cursor-not-allowed"
+                  disabled>
+                  <i class="fa fa-check-circle"></i> CONFIRMAR PEDIDO
+                </button>
+              </div>
+            </div>
+            <div class="hidden lg:block">
+              <div class="bg-neutral-800 p-6 rounded-xl border border-amber-500/20 shadow-lg h-full">
+                <h3 class="text-xl font-bold text-amber-500 mb-4">Detalhes da Venda</h3>
+                <p class="text-gray-400">Esta coluna pode ser usada para um resumo ou detalhes de entrega do cliente
+                  selecionado no PDV.</p>
+              </div>
+            </div>
+          </div>
 
-          <label>Quantidade</label>
-          <input id="qtdVenda" type="number" min="1" value="1" />
 
-          <button type="submit">Registrar Venda</button>
-        </form>
-
-        <table>
-          <thead>
-            <tr><th>Cliente</th><th>Produto</th><th>Qtd</th><th>Total</th></tr>
-          </thead>
-          <tbody id="tabelaVendas"></tbody>
-        </table>
-      </section>
-
+          <div id="vendas-historico"
+            class="bg-neutral-800 rounded-xl border border-amber-500/20 overflow-hidden shadow-lg flex-grow flex flex-col">
+            <div class="p-4 bg-neutral-900/50 border-b border-gray-700">
+              <h2 class="text-xl font-bold">Histórico Recente de Vendas</h2>
+            </div>
+            <div class="overflow-y-auto flex-grow p-0 h-96">
+              <table class="w-full text-left">
+                <thead class="bg-neutral-700 text-gray-300 sticky top-0">
+                  <tr>
+                    <th class="p-3">Cliente</th>
+                    <th class="p-3">Itens</th>
+                    <th class="p-3 text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaHistoricoVendas"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
     </main>
   </div>
 
-  <script src="script.js"></script>
+  <script src="Script.js"></script>
 </body>
-</html>
 
+</html>
