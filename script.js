@@ -1,339 +1,432 @@
-/* ============================
-   SISTEMA PDV - SCRIPT.JS
-   Revisado e testado logicamente
-   ============================ */
+/* ================= BANCO DE DADOS LOCAL ================= */
+let db = {
+  clientes: JSON.parse(localStorage.getItem('clientes')) || [],
+  estoque: JSON.parse(localStorage.getItem('estoque')) || [],
+  vendas: JSON.parse(localStorage.getItem('vendas')) || []
+};
 
-/* ---------- SPLASH -> LOGIN ---------- */
+// Estado do Carrinho (Volátil)
+let carrinho = [];
+
+function saveDB() {
+  localStorage.setItem('clientes', JSON.stringify(db.clientes));
+  localStorage.setItem('estoque', JSON.stringify(db.estoque));
+  localStorage.setItem('vendas', JSON.stringify(db.vendas));
+  updateDashboard();
+}
+
+/* ================= NAVEGAÇÃO E INICIALIZAÇÃO ================= */
 window.addEventListener("load", () => {
-  // mostrar splash por 1.8s, depois revelar login (ou app se já logado)
-  setTimeout(() => {
-    const splash = document.getElementById("splash");
-    if (splash) splash.classList.add("hidden");
-
-    if (localStorage.getItem("logado") === "true") {
-      document.getElementById("login-page").classList.add("hidden");
-      document.getElementById("app").classList.remove("hidden");
-      carregar();
-    } else {
-      document.getElementById("login-page").classList.remove("hidden");
-    }
-  }, 1800);
+  // Se estiver logado, mostra o app e esconde login
+  if (localStorage.getItem('logged') === 'true') {
+    document.getElementById('login-page').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    renderAll();
+  } else {
+    // Garante que o login está visível
+    document.getElementById('login-page').classList.remove('hidden');
+    document.getElementById('app').classList.add('hidden');
+  }
 });
 
-/* ---------- LOGIN / LOGOUT ---------- */
-document.getElementById("btnLogin").addEventListener("click", login);
-
 function login() {
-  const user = document.getElementById("usuario").value.trim();
-  const pass = document.getElementById("senha").value.trim();
+  const u = document.getElementById('usuario').value;
+  const s = document.getElementById('senha').value;
 
-  if (user === "admin" && pass === "1234") {
-    localStorage.setItem("logado", "true");
-    document.getElementById("login-page").classList.add("hidden");
-    document.getElementById("app").classList.remove("hidden");
-    carregar();
-    // show dashboard on login
-    mostrarPagina("dashboard");
+  if (u === 'admin' && s === '1234') {
+    localStorage.setItem('logged', 'true');
+    document.getElementById('login-page').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    renderAll();
   } else {
-    alertaEspecial("Usuário ou senha inválidos!");
+    alert("Usuário ou senha incorretos! (admin / 1234)");
   }
 }
 
 function logout() {
-  localStorage.removeItem("logado");
+  localStorage.removeItem('logged');
   location.reload();
 }
 
-/* ---------- NAVEGAÇÃO ---------- */
-function mostrarPagina(id) {
-  document.querySelectorAll("main section").forEach(sec => sec.classList.add("hidden"));
-  const sec = document.getElementById(id);
-  if (sec) sec.classList.remove("hidden");
+function mostrarPagina(pageId) {
+  // Esconde todas as seções
+  document.querySelectorAll('.page-section').forEach(el => el.classList.add('hidden'));
 
-  document.querySelectorAll(".sidebar a").forEach(a => a.classList.remove("active"));
-  const link = document.getElementById("link" + id.charAt(0).toUpperCase() + id.slice(1));
-  if (link) link.classList.add("active");
+  // Tenta encontrar a página
+  const pagina = document.getElementById(pageId);
+  if (pagina) pagina.classList.remove('hidden');
 
-  atualizarDashboard();
+  // Atualiza menu
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  const btn = document.getElementById('btn-' + pageId);
+  if (btn) btn.classList.add('active');
 
-  // trigger subtitle animation when dashboard shown
-  if (id === "dashboard") {
-    setTimeout(() => onDashboardShow(), 120);
+  // Ações de inicialização/renderização
+  if (pageId === 'vendas') renderSelectsVenda(); // Vendas (PDV & Histórico)
+  if (pageId === 'dashboard') updateDashboard();
+  if (pageId === 'clientes') renderClientes();
+  if (pageId === 'estoque') renderEstoque();
+}
+
+function renderAll() {
+  renderClientes();
+  renderEstoque();
+  renderHistoricoVendas();
+  updateDashboard();
+}
+
+/**
+ * Zera todos os dados armazenados no Local Storage.
+ */
+function clearAllRecords() {
+  if (confirm("ATENÇÃO: Você tem certeza que deseja apagar TODOS os dados (Clientes, Estoque e Vendas)? Esta ação é irreversível.")) {
+    // Remove do Local Storage
+    localStorage.removeItem('clientes');
+    localStorage.removeItem('estoque');
+    localStorage.removeItem('vendas');
+
+    // Zera o objeto DB em memória
+    db.clientes = [];
+    db.estoque = [];
+    db.vendas = [];
+
+    // Atualiza a interface
+    renderAll();
+    // Zera o carrinho (embora deva estar vazio)
+    carrinho = [];
+    renderCarrinho();
+
+    alert("Todos os registros foram apagados com sucesso!");
+    mostrarPagina('dashboard'); // Volta para o dashboard
   }
 }
 
-/* ---------- STORAGE DATA ---------- */
-let clientes = JSON.parse(localStorage.getItem("clientes")) || [];
-let estoque = JSON.parse(localStorage.getItem("estoque")) || [];
-let vendas = JSON.parse(localStorage.getItem("vendas")) || [];
-
-/* ---------- CLIENTES ---------- */
+/* ================= MÓDULO: CLIENTES ================= */
 function addCliente() {
+  const nome = document.getElementById('nomeCliente').value;
+  if (!nome) return alert("Nome é obrigatório!");
+
   const novo = {
     id: Date.now(),
-    nome: document.getElementById("nomeCliente").value.trim(),
-    tel: document.getElementById("telefoneCliente").value.trim(),
-    endereco: document.getElementById("enderecoCliente").value.trim(),
-    numero: document.getElementById("numeroCliente").value.trim(),
-    bairro: document.getElementById("bairroCliente").value.trim(),
-    cidade: document.getElementById("cidadeCliente").value.trim(),
-    cep: document.getElementById("cepCliente").value.trim(),
-    referencia: document.getElementById("referenciaCliente").value.trim(),
-    tipo: document.getElementById("tipoCliente").value,
-    pagamento: document.getElementById("pagamentoPreferido").value,
-    obs: document.getElementById("obsCliente").value.trim()
+    nome: nome,
+    tel: document.getElementById('telCliente').value,
+    endereco: document.getElementById('enderecoCliente').value,
+    numero: document.getElementById('numeroCliente').value,
+    cep: document.getElementById('cepCliente').value,
+    pagamentoPreferido: document.getElementById('pagamentoPreferidoCliente').value
   };
 
-  if (!novo.nome) {
-    alertaEspecial("Digite o nome do cliente.");
-    return;
+  db.clientes.push(novo);
+  saveDB();
+
+  // Limpa form (mantém o usuário na mesma página)
+  document.getElementById('nomeCliente').value = "";
+  document.getElementById('telCliente').value = "";
+  document.getElementById('enderecoCliente').value = "";
+  document.getElementById('numeroCliente').value = "";
+  document.getElementById('cepCliente').value = "";
+  document.getElementById('pagamentoPreferidoCliente').value = "";
+
+  alert("Cliente salvo!");
+  renderClientes(); // Renderiza a tabela atualizada
+}
+
+function renderClientes() {
+  const tbody = document.getElementById('tabelaClientes');
+  if (!tbody) return;
+
+  tbody.innerHTML = db.clientes.map(c => `
+        <tr class="border-b border-gray-700 hover:bg-neutral-800">
+            <td class="p-3 font-medium text-white">${c.nome}</td>
+            <td class="p-3 text-gray-400 whitespace-nowrap">${c.tel || '-'}</td>
+            <td class="p-3 text-gray-400 whitespace-nowrap">${c.endereco || ''}${c.numero ? ', Nº ' + c.numero : ''}</td>
+            <td class="p-3 text-gray-400 whitespace-nowrap">${c.cep || '-'}</td>
+            <td class="p-3 text-amber-400 whitespace-nowrap">${c.pagamentoPreferido || '-'}</td>
+            <td class="p-3 text-right">
+                <button onclick="deleteCliente(${c.id})" class="text-red-400 hover:text-red-300"><i class="fa fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('') || '<tr><td colspan="6" class="p-4 text-center text-gray-500">Nenhum cliente cadastrado.</td></tr>';
+}
+
+function deleteCliente(id) {
+  if (confirm("Remover cliente?")) {
+    db.clientes = db.clientes.filter(c => c.id !== id);
+    saveDB();
+    renderClientes();
   }
-
-  clientes.push(novo);
-  localStorage.setItem("clientes", JSON.stringify(clientes));
-  limparCamposCliente();
-  atualizarClientes();
-  atualizarSelects();
-  atualizarDashboard();
-  alertaEspecial("Cliente salvo com sucesso!");
 }
 
-function limparCamposCliente() {
-  [
-    "nomeCliente","telefoneCliente","enderecoCliente","numeroCliente",
-    "bairroCliente","cidadeCliente","cepCliente","referenciaCliente",
-    "obsCliente"
-  ].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = "";
-  });
-}
-
-function atualizarClientes() {
-  const tb = document.getElementById("tabelaClientes");
-  if (!tb) return;
-  tb.innerHTML = clientes.map(c => `
-    <tr>
-      <td>${escapeHtml(c.nome)}</td>
-      <td>${escapeHtml(c.tel || "")}</td>
-      <td>${escapeHtml(c.bairro || "")}</td>
-      <td><button class="btn-delete" onclick="delCliente(${c.id})">🗑</button></td>
-    </tr>
-  `).join("");
-}
-
-function delCliente(id) {
-  clientes = clientes.filter(c => c.id !== id);
-  localStorage.setItem("clientes", JSON.stringify(clientes));
-  atualizarClientes();
-  atualizarSelects();
-  atualizarDashboard();
-}
-
-/* ---------- ESTOQUE ---------- */
+/* ================= MÓDULO: ESTOQUE ================= */
 function addProduto() {
-  const nome = document.getElementById("nomeProduto").value.trim();
-  const qtd = Number(document.getElementById("quantidadeProduto").value) || 0;
-  const preco = Number(document.getElementById("precoProduto").value) || 0;
+  const nome = document.getElementById('nomeProduto').value;
+  if (!nome) return alert("Nome do produto obrigatório!");
 
-  if (!nome) {
-    alertaEspecial("Informe o nome do produto!");
+  const novo = {
+    id: Date.now(),
+    nome: nome,
+    qtd: parseInt(document.getElementById('qtdProduto').value) || 0,
+    preco: parseFloat(document.getElementById('precoProduto').value) || 0
+  };
+
+  db.estoque.push(novo);
+  saveDB();
+
+  // Limpa form (mantém o usuário na mesma página)
+  document.getElementById('nomeProduto').value = "";
+  document.getElementById('qtdProduto').value = "";
+  document.getElementById('precoProduto').value = "";
+
+  alert("Produto salvo!");
+  renderEstoque(); // Renderiza a tabela atualizada
+}
+
+function renderEstoque() {
+  const tbody = document.getElementById('tabelaEstoque');
+  if (!tbody) return;
+
+  tbody.innerHTML = db.estoque.map(p => `
+        <tr class="border-b border-gray-700 hover:bg-neutral-800">
+            <td class="p-3 font-medium text-white">${p.nome}</td>
+            <td class="p-3 text-center ${p.qtd < 5 ? 'text-red-500 font-bold' : 'text-green-500'}">${p.qtd}</td>
+            <td class="p-3 text-right text-amber-400">R$ ${p.preco.toFixed(2)}</td>
+            <td class="p-3 text-right">
+                <button onclick="deleteProduto(${p.id})" class="text-red-400 hover:text-red-300"><i class="fa fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('') || '<tr><td colspan="4" class="p-4 text-center text-gray-500">Estoque vazio.</td></tr>';
+}
+
+function deleteProduto(id) {
+  if (confirm("Remover do estoque?")) {
+    db.estoque = db.estoque.filter(p => p.id !== id);
+    saveDB();
+    renderEstoque();
+  }
+}
+
+/* ================= MÓDULO: VENDAS (PDV & CARRINHO) ================= */
+function renderSelectsVenda() {
+  const selCli = document.getElementById('selCliente');
+  const selProd = document.getElementById('selProduto');
+
+  // Clientes no PDV - Mostra o nome e telefone
+  selCli.innerHTML = '<option value="">-- Selecione Cliente --</option>' +
+    db.clientes.map(c => `<option value="${c.id}">${c.nome} (${c.tel || 'S/ Telefone'})</option>`).join('');
+
+  selProd.innerHTML = '<option value="">-- Selecione Produto --</option>' +
+    db.estoque.filter(p => p.qtd > 0).map(p => `<option value="${p.id}">${p.nome} (R$ ${p.preco.toFixed(2)})</option>`).join('');
+
+  // Assegura que o carrinho e histórico estejam renderizados ao entrar na página Vendas
+  renderCarrinho();
+  renderHistoricoVendas();
+}
+
+function adicionarAoCarrinho() {
+  const prodId = document.getElementById('selProduto').value;
+  if (!prodId) return;
+
+  const produtoReal = db.estoque.find(p => p.id == prodId);
+
+  // Verifica se já existe no carrinho para somar quantidade
+  const itemExistente = carrinho.find(i => i.id == prodId);
+  const qtdNoCarrinho = itemExistente ? itemExistente.qtdCarrinho : 0;
+
+  if (qtdNoCarrinho >= produtoReal.qtd) {
+    return alert("Estoque insuficiente para adicionar mais deste item!");
+  }
+
+  if (itemExistente) {
+    itemExistente.qtdCarrinho++;
+  } else {
+    carrinho.push({
+      id: produtoReal.id,
+      nome: produtoReal.nome,
+      preco: produtoReal.preco,
+      qtdCarrinho: 1
+    });
+  }
+  renderCarrinho();
+}
+
+function removerDoCarrinho(index) {
+  carrinho.splice(index, 1);
+  renderCarrinho();
+}
+
+function renderCarrinho() {
+  const lista = document.getElementById('listaCarrinho');
+  const displayTotal = document.getElementById('totalCarrinhoDisplay');
+  const btn = document.getElementById('btnFinalizar');
+
+  if (carrinho.length === 0) {
+    lista.innerHTML = '<div class="text-center text-gray-500 py-8 italic border-2 border-dashed border-gray-700 rounded">Carrinho vazio</div>';
+    displayTotal.innerText = "R$ 0.00";
+    btn.disabled = true;
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
     return;
   }
 
-  estoque.push({ id: Date.now(), nome, qtd, preco });
-  localStorage.setItem("estoque", JSON.stringify(estoque));
-  document.getElementById("nomeProduto").value = "";
-  document.getElementById("quantidadeProduto").value = "";
-  document.getElementById("precoProduto").value = "";
-  atualizarEstoque();
-  atualizarSelects();
-  atualizarDashboard();
-  alertaEspecial("Produto salvo!");
+  let total = 0;
+  lista.innerHTML = carrinho.map((item, idx) => {
+    const subtotal = item.preco * item.qtdCarrinho;
+    total += subtotal;
+    return `
+        <div class="flex justify-between items-center bg-neutral-900 p-3 rounded border border-gray-700 animate-fade-in">
+            <div>
+                <div class="font-bold text-white">${item.nome}</div>
+                <div class="text-xs text-gray-400">${item.qtdCarrinho}x R$ ${item.preco.toFixed(2)}</div>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-amber-500 font-bold">R$ ${subtotal.toFixed(2)}</span>
+                <button onclick="removerDoCarrinho(${idx})" class="text-red-500 hover:text-red-400"><i class="fa fa-times"></i></button>
+            </div>
+        </div>
+        `;
+  }).join('');
+
+  displayTotal.innerText = `R$ ${total.toFixed(2)}`;
+  btn.disabled = false;
+  btn.classList.remove('opacity-50', 'cursor-not-allowed');
 }
 
-function atualizarEstoque() {
-  const tb = document.getElementById("tabelaEstoque");
-  if (!tb) return;
-  tb.innerHTML = estoque.map(p => `
-    <tr>
-      <td>${escapeHtml(p.nome)}</td>
-      <td>${p.qtd}</td>
-      <td>R$ ${Number(p.preco || 0).toFixed(2)}</td>
-      <td><button class="btn-delete" onclick="delProduto(${p.id})">🗑</button></td>
-    </tr>
-  `).join("");
+function finalizarVenda() {
+  const cliId = document.getElementById('selCliente').value;
+  if (!cliId) return alert("Selecione um cliente!");
+
+  const cliente = db.clientes.find(c => c.id == cliId);
+  const totalVenda = carrinho.reduce((acc, item) => acc + (item.preco * item.qtdCarrinho), 0);
+
+  // Debitar Estoque
+  carrinho.forEach(itemCart => {
+    const prodEstoque = db.estoque.find(p => p.id == itemCart.id);
+    if (prodEstoque) prodEstoque.qtd -= itemCart.qtdCarrinho;
+  });
+
+  // Salvar Venda
+  db.vendas.push({
+    id: Date.now(),
+    clienteNome: cliente.nome,
+    total: totalVenda,
+    itens: [...carrinho], // cópia
+    data: new Date().toLocaleString()
+  });
+
+  // Reset
+  carrinho = [];
+  document.getElementById('selCliente').value = "";
+  document.getElementById('selProduto').value = "";
+
+  saveDB();
+  renderEstoque();
+  renderCarrinho();
+  renderHistoricoVendas();
+
+  alert("Venda realizada com sucesso! 🎉");
+  // Não precisa chamar mostrarPagina, já estamos nela.
 }
 
-function delProduto(id) {
-  estoque = estoque.filter(p => p.id !== id);
-  localStorage.setItem("estoque", JSON.stringify(estoque));
-  atualizarEstoque();
-  atualizarSelects();
-  atualizarDashboard();
-}
+function renderHistoricoVendas() {
+  const tbody = document.getElementById('tabelaHistoricoVendas');
+  if (!tbody) return;
+  // Pega as últimas vendas, inverte a ordem para mostrar a mais recente no topo
+  const historico = [...db.vendas].reverse();
 
-/* ---------- VENDAS ---------- */
-function fazerVenda() {
-  const cliente = document.getElementById("clienteVenda").value;
-  const produtoNome = document.getElementById("produtoVenda").value;
-  const qtd = Number(document.getElementById("qtdVenda").value) || 0;
-
-  if (!cliente || !produtoNome || qtd <= 0) {
-    alertaEspecial("Preencha cliente, produto e quantidade.");
+  if (historico.length === 0) {
+    // CORREÇÃO: Adiciona a mensagem de fallback na tabela
+    tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-gray-500">Nenhuma venda registrada. Comece um novo pedido acima!</td></tr>';
     return;
   }
 
-  const produto = estoque.find(p => p.nome === produtoNome);
-  if (!produto) { alertaEspecial("Produto inválido."); return; }
-  if (produto.qtd < qtd) { alertaEspecial("Estoque insuficiente."); return; }
-
-  produto.qtd -= qtd;
-  const total = produto.preco * qtd;
-  vendas.push({ id: Date.now(), cliente, produto: produtoNome, qtd, total });
-  localStorage.setItem("vendas", JSON.stringify(vendas));
-  localStorage.setItem("estoque", JSON.stringify(estoque));
-  atualizarVendas();
-  atualizarEstoque();
-  atualizarSelects();
-  atualizarDashboard();
-  alertaEspecial(`Venda registrada — R$ ${total.toFixed(2)}`);
+  tbody.innerHTML = historico.map(v => `
+        <tr class="border-b border-gray-700 hover:bg-neutral-800">
+            <td class="p-3">
+                <div class="font-bold text-white">${v.clienteNome}</div>
+                <div class="text-xs text-gray-500">${v.data}</div>
+            </td>
+            <td class="p-3 text-gray-300 text-sm">${v.itens.length} itens</td>
+            <td class="p-3 text-right font-bold text-green-400">R$ ${v.total.toFixed(2)}</td>
+        </tr>
+    `).join('');
 }
 
-function atualizarVendas() {
-  const tb = document.getElementById("tabelaVendas");
-  if (!tb) return;
-  tb.innerHTML = vendas.map(v => `
-    <tr>
-      <td>${escapeHtml(v.cliente)}</td>
-      <td>${escapeHtml(v.produto)}</td>
-      <td>${v.qtd}</td>
-      <td>R$ ${Number(v.total || 0).toFixed(2)}</td>
-    </tr>
-  `).join("");
-}
+/* ================= MÓDULO: DASHBOARD & GRÁFICOS ================= */
+let myChart = null;
 
-/* ---------- DASHBOARD / SELECTS / LOAD ---------- */
-function atualizarDashboard() {
-  const elC = document.getElementById("totalClientes");
-  const elP = document.getElementById("totalProdutos");
-  const elV = document.getElementById("totalVendas");
-  if (elC) elC.textContent = clientes.length;
-  if (elP) elP.textContent = estoque.reduce((a,b)=>a+(Number(b.qtd)||0),0);
-  if (elV) elV.textContent = vendas.length;
-}
+function updateDashboard() {
+  // Cards
+  const elClientes = document.getElementById('totalClientes');
+  if (elClientes) elClientes.innerText = db.clientes.length;
 
-function atualizarSelects() {
-  const selC = document.getElementById("clienteVenda");
-  const selP = document.getElementById("produtoVenda");
-  if (selC) selC.innerHTML = "<option value=''>-- selecione --</option>" + clientes.map(c => `<option>${escapeHtml(c.nome)}</option>`).join("");
-  if (selP) selP.innerHTML = "<option value=''>-- selecione --</option>" + estoque.map(p => `<option>${escapeHtml(p.nome)}</option>`).join("");
-}
+  const elProd = document.getElementById('totalProdutos');
+  if (elProd) elProd.innerText = db.estoque.reduce((acc, p) => acc + p.qtd, 0);
 
-function carregar() {
-  atualizarClientes();
-  atualizarEstoque();
-  atualizarVendas();
-  atualizarSelects();
-  atualizarDashboard();
-}
+  const elVendas = document.getElementById('totalVendasDisplay');
+  if (elVendas) elVendas.innerText = db.vendas.length;
 
-/* ---------- ALERTA VISUAL (central) ---------- */
-function alertaEspecial(mensagem, autoHideMs=1600) {
-  // cria overlay
-  const existente = document.querySelector(".alerta-bg");
-  if (existente) existente.remove();
+  // Chart.js
+  const ctx = document.getElementById('salesChart');
+  if (!ctx) return;
 
-  const alerta = document.createElement("div");
-  alerta.className = "alerta-bg";
-  alerta.style.position = "fixed";
-  alerta.style.inset = "0";
-  alerta.style.display = "flex";
-  alerta.style.justifyContent = "center";
-  alerta.style.alignItems = "center";
-  alerta.style.background = "rgba(0,0,0,0.6)";
-  alerta.style.zIndex = 99999;
-
-  const box = document.createElement("div");
-  box.className = "alerta-box";
-  box.style.background = "#1e1e1e";
-  box.style.border = "3px solid #ffb300";
-  box.style.color = "#ffb300";
-  box.style.padding = "24px 38px";
-  box.style.borderRadius = "14px";
-  box.style.fontSize = "1.1rem";
-  box.style.fontWeight = "700";
-  box.style.textAlign = "center";
-  box.style.boxShadow = "0 0 30px rgba(255,179,0,0.35)";
-  box.innerHTML = `🍕 ${escapeHtml(mensagem)}`;
-
-  alerta.appendChild(box);
-  document.body.appendChild(alerta);
-
-  // clique para fechar
-  alerta.addEventListener("click", () => alerta.remove());
-
-  if (autoHideMs>0) {
-    setTimeout(()=>{ alerta.remove(); }, autoHideMs);
+  if (typeof Chart === 'undefined') {
+    console.warn("Chart.js não carregou.");
+    return;
   }
-}
 
-/* ---------- SUBTITLE TYPING + SOM + SMOKE ---------- */
-function tocarSomEntrada(vol=0.22) {
-  try {
-    const a = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_3479db72aa.mp3");
-    a.volume = vol;
-    a.play().catch(()=>{});
-  } catch(e) {}
-}
+  const ultimasVendas = db.vendas.slice(-10);
+  const labels = ultimasVendas.map((_, i) => `Venda ${i + 1}`);
+  const data = ultimasVendas.map(v => v.total);
 
-function triggerSubtitleAnimation(text="Seja bem-vindo ao nosso sistema! 🍕🔥", durationMS=2200) {
-  const el = document.querySelector(".dashboard-subtitle");
-  if (!el) return;
-  el.classList.remove("typing");
-  el.style.width = "0ch";
-  el.style.transition = "none";
-  el.textContent = text;
-  const totalChars = Math.max(1, String(text).length);
-  const totalDuration = Math.max(600, durationMS);
-  const perChar = totalDuration / totalChars;
-  let current = 0;
-  el.style.borderRight = "3px solid rgba(255,221,102,0.95)";
-  el.classList.add("typing");
-  tocarSomEntrada(0.18);
-  const timer = setInterval(() => {
-    current++;
-    el.style.width = current + "ch";
-    if (current >= totalChars) {
-      clearInterval(timer);
-      setTimeout(()=>{ el.style.borderRight = "0px"; }, 500);
+  if (myChart) myChart.destroy();
+
+  myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Valor da Venda (R$)',
+        data: data,
+        backgroundColor: '#f59e0b',
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: '#333'
+          },
+          ticks: {
+            color: '#9ca3af'
+          }
+        },
+        x: {
+          display: false
+        }
+      }
     }
-  }, perChar);
-}
-
-function onDashboardShow() {
-  triggerSubtitleAnimation("🔥 Bem-vindo à Pizzaria Dona Jô — Vendas quentes hoje! 🔥", 2200);
-}
-
-/* ---------- UTILIDADES ---------- */
-function escapeHtml(str) {
-  if (!str && str !== 0) return "";
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
-/* ---------- AUTO-LOAD if already logged ---------- */
-if (localStorage.getItem("logado") === "true") {
-  // If already logged, reveal app immediately (splash will hide on load handler)
-  document.addEventListener("DOMContentLoaded", () => {
-    const splash = document.getElementById("splash");
-    if (splash) splash.classList.add("hidden");
-    document.getElementById("login-page").classList.add("hidden");
-    document.getElementById("app").classList.remove("hidden");
-    carregar();
   });
 }
+
+// Expõe as funções para uso no HTML (onclick)
+window.login = login;
+window.logout = logout;
+window.mostrarPagina = mostrarPagina;
+window.addCliente = addCliente;
+window.deleteCliente = deleteCliente;
+window.addProduto = addProduto;
+window.deleteProduto = deleteProduto;
+window.adicionarAoCarrinho = adicionarAoCarrinho;
+window.removerDoCarrinho = removerDoCarrinho;
+window.finalizarVenda = finalizarVenda;
+window.renderHistoricoVendas = renderHistoricoVendas;
+window.updateDashboard = updateDashboard;
+window.clearAllRecords = clearAllRecords; // EXPOSIÇÃO DA NOVA FUNÇÃO
