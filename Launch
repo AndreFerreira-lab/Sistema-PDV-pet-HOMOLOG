@@ -1,0 +1,14 @@
+{
+    // Use o IntelliSense para aprender sobre os atributos possíveis.
+    // Passe o cursor sobre eles para visualizar as descrições dos atributos existentes.
+    // Para obter mais informações, visite: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chrome (File)",
+            "file": "${workspaceFolder}/index.html"
+        }
+    ]
+}
