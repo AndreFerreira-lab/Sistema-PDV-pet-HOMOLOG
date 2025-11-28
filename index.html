@@ -16,21 +16,21 @@
 
   <section id="login-page" class="absolute inset-0 z-50 flex items-center justify-center bg-neutral-900">
     <div class="bg-neutral-800 p-8 rounded-xl border border-amber-500/30 shadow-2xl w-full max-w-md text-center">
-      <h1 class="text-4xl font-bold text-amber-500 neon-text mb-2">🍕 Dona Jô</h1>
+      <h1 class="text-4xl font-bold text-amber-500 neon-text mb-2">🍕 Donna Jô</h1>
       <p class="text-gray-400 mb-6">Sistema de Gestão & PDV</p>
 
       <div class="space-y-4 text-left">
         <div>
           <label class="text-sm text-gray-400">Usuário</label>
-          <input type="text" id="usuario" class="input-field" placeholder="admin">
+          <input type="text" id="usuario" class="input-field" placeholder="Insira seu Usuário">
         </div>
         <div>
           <label class="text-sm text-gray-400">Senha</label>
-          <input type="password" id="senha" class="input-field" placeholder="1234">
+          <input type="password" id="senha" class="input-field" placeholder="Insira sua Senha">
         </div>
         <button onclick="login()" class="btn-primary w-full mt-4 justify-center">ENTRAR</button>
       </div>
-      <p class="mt-4 text-xs text-gray-600">Admin: admin / Senha: 1234</p>
+      <p class="mt-4 text-xs text-gray-600">Usuário: admin / Senha: 1234</p>
     </div>
   </section>
 
@@ -38,7 +38,7 @@
 
     <aside class="w-64 bg-neutral-800 border-r border-amber-500/30 flex-shrink-0 flex flex-col hidden md:flex">
       <div class="p-6 text-center border-b border-gray-700">
-        <h2 class="text-2xl font-bold text-amber-500 neon-text">🍕 Dona Jô</h2>
+        <h2 class="text-2xl font-bold text-amber-500 neon-text">🍕 Donna Jô</h2>
       </div>
       <nav class="flex-grow p-4 space-y-2">
         <button onclick="mostrarPagina('dashboard')" id="btn-dashboard" class="nav-btn active"><i
@@ -250,7 +250,7 @@
         </section>
 
 
-        <section id="vendas" class="page-section hidden fade-in h-full flex flex-col">
+        <section id="vendas" class="page-section hidden fade-in">
           <h1 class="text-3xl font-bold text-amber-500 neon-text mb-6 flex items-center gap-2"><i
               class="fa fa-shopping-cart"></i> PDV & Histórico
           </h1>
@@ -259,7 +259,8 @@
             <div class="flex flex-col gap-6">
               <div class="bg-neutral-800 p-6 rounded-xl border border-amber-500/20 shadow-lg">
                 <h3 class="text-xl font-bold text-amber-500 mb-4 border-b border-gray-700 pb-2 flex items-center gap-2">
-                  <i class="fa fa-cash-register"></i> Novo Pedido (PDV)</h3>
+                  <i class="fa fa-cash-register"></i> Novo Pedido (PDV)
+                </h3>
                 <div class="space-y-4">
                   <div>
                     <label class="text-amber-500 font-bold text-sm">1. Cliente</label>
@@ -296,11 +297,13 @@
                 </button>
               </div>
             </div>
-            <div class="hidden lg:block">
+            <div>
               <div class="bg-neutral-800 p-6 rounded-xl border border-amber-500/20 shadow-lg h-full">
                 <h3 class="text-xl font-bold text-amber-500 mb-4">Detalhes da Venda</h3>
-                <p class="text-gray-400">Esta coluna pode ser usada para um resumo ou detalhes de entrega do cliente
-                  selecionado no PDV.</p>
+                <div id="detalhesVendaContent" class="text-gray-400 h-full overflow-y-auto">
+                  <p class="italic text-center mt-10 text-gray-500">Selecione uma venda no histórico para ver os
+                    detalhes.</p>
+                </div>
               </div>
             </div>
           </div>
