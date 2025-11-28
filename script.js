@@ -329,25 +329,105 @@ function finalizarVenda() {
 function renderHistoricoVendas() {
   const tbody = document.getElementById('tabelaHistoricoVendas');
   if (!tbody) return;
+
+  if (!Array.isArray(db.vendas)) {
+    console.error("db.vendas não é um array!", db.vendas);
+    db.vendas = [];
+  }
+  console.log("Renderizando histórico. Total vendas:", db.vendas.length);
+
   // Pega as últimas vendas, inverte a ordem para mostrar a mais recente no topo
   const historico = [...db.vendas].reverse();
 
   if (historico.length === 0) {
-    // CORREÇÃO: Adiciona a mensagem de fallback na tabela
     tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-gray-500">Nenhuma venda registrada. Comece um novo pedido acima!</td></tr>';
     return;
   }
 
-  tbody.innerHTML = historico.map(v => `
-        <tr class="border-b border-gray-700 hover:bg-neutral-800">
+  tbody.innerHTML = historico.map(v => {
+    const resumoItens = v.itens.map(i => `${i.qtdCarrinho}x ${i.nome}`).join(', ');
+    return `
+        <tr onclick="verDetalhesVenda(${v.id})" class="border-b border-gray-700 hover:bg-neutral-700 cursor-pointer transition-colors">
             <td class="p-3">
                 <div class="font-bold text-white">${v.clienteNome}</div>
                 <div class="text-xs text-gray-500">${v.data}</div>
             </td>
-            <td class="p-3 text-gray-300 text-sm">${v.itens.length} itens</td>
+            <td class="p-3 text-gray-300 text-sm">
+                <div class="line-clamp-2" title="${resumoItens}">${resumoItens}</div>
+            </td>
             <td class="p-3 text-right font-bold text-green-400">R$ ${v.total.toFixed(2)}</td>
         </tr>
-    `).join('');
+    `;
+  }).join('');
+}
+
+function verDetalhesVenda(id) {
+  const venda = db.vendas.find(v => v.id === id);
+  const container = document.getElementById('detalhesVendaContent');
+
+  if (!venda || !container) return;
+
+  // Scroll para detalhes (útil em mobile)
+  container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  container.innerHTML = `
+    <div class="space-y-4 animate-fade-in">
+        <div class="flex justify-between items-start border-b border-gray-700 pb-4">
+            <div>
+                <h4 class="text-lg font-bold text-white">${venda.clienteNome}</h4>
+                <p class="text-sm text-gray-500">${venda.data}</p>
+            </div>
+            <span class="bg-green-900/50 text-green-400 px-3 py-1 rounded-full text-sm font-bold">
+                Concluído
+            </span>
+        </div>
+
+        <div class="space-y-2">
+            <h5 class="text-amber-500 font-semibold text-sm uppercase tracking-wider">Itens do Pedido</h5>
+            <div class="bg-neutral-900/50 rounded-lg p-3 space-y-2 max-h-60 overflow-y-auto">
+                ${venda.itens.map(item => `
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-300"><span class="text-amber-500 font-bold">${item.qtdCarrinho}x</span> ${item.nome}</span>
+                        <span class="text-gray-400">R$ ${(item.preco * item.qtdCarrinho).toFixed(2)}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-gray-700 flex justify-between items-center">
+            <span class="text-gray-400">Total do Pedido</span>
+            <span class="text-2xl font-bold text-green-400">R$ ${venda.total.toFixed(2)}</span>
+        </div>
+        
+        <div class="pt-4">
+             <button onclick="imprimirCupom(${venda.id})" class="w-full border border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-black font-bold py-2 rounded transition-colors text-sm">
+                <i class="fa fa-print"></i> IMPRIMIR CUPOM
+             </button>
+        </div>
+    </div>
+  `;
+}
+
+function imprimirCupom(id) {
+  const venda = db.vendas.find(v => v.id === id);
+  if (!venda) return;
+
+  // Simulação de impressão
+  const conteudo = `
+    ================================
+    PIZZARIA DONA JÔ
+    ================================
+    Cliente: ${venda.clienteNome}
+    Data: ${venda.data}
+    --------------------------------
+    ${venda.itens.map(i => `${i.qtdCarrinho}x ${i.nome.padEnd(20)} R$ ${(i.preco * i.qtdCarrinho).toFixed(2)}`).join('\n')}
+    --------------------------------
+    TOTAL: R$ ${venda.total.toFixed(2)}
+    ================================
+    `;
+
+  console.log(conteudo);
+  alert("Cupom enviado para impressão! (Veja o console para visualizar)");
 }
 
 /* ================= MÓDULO: DASHBOARD & GRÁFICOS ================= */
@@ -429,4 +509,6 @@ window.removerDoCarrinho = removerDoCarrinho;
 window.finalizarVenda = finalizarVenda;
 window.renderHistoricoVendas = renderHistoricoVendas;
 window.updateDashboard = updateDashboard;
-window.clearAllRecords = clearAllRecords; // EXPOSIÇÃO DA NOVA FUNÇÃO
+window.clearAllRecords = clearAllRecords;
+window.verDetalhesVenda = verDetalhesVenda;
+window.imprimirCupom = imprimirCupom;
